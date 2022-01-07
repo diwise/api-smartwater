@@ -11,7 +11,7 @@ import (
 )
 
 type Datastore interface {
-	CreateWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
+	StoreWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
 }
 
 type myDB struct {
@@ -56,7 +56,7 @@ func NewDatabaseConnection(connect ConnectorFunc) (Datastore, error) {
 	return db, nil
 }
 
-func (db *myDB) CreateWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
+func (db *myDB) StoreWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 	wco := models.WaterConsumption{
 		Device:      device,
 		Consumption: consumption,
