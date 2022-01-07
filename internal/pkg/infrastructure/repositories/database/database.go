@@ -1,10 +1,8 @@
 package database
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/diwise/ngsi-ld-golang/pkg/datamodels/fiware"
 	"github.com/rs/zerolog"
 	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/models"
 	"gorm.io/driver/sqlite"
@@ -13,7 +11,7 @@ import (
 )
 
 type Datastore interface {
-	CreateWaterConsumption(wco *fiware.WaterConsumptionObserved) (*models.WaterConsumption, error)
+	CreateWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
 }
 
 type myDB struct {
@@ -58,18 +56,12 @@ func NewDatabaseConnection(connect ConnectorFunc) (Datastore, error) {
 	return db, nil
 }
 
-func (db *myDB) CreateWaterConsumption(fiwareWCO *fiware.WaterConsumptionObserved) (*models.WaterConsumption, error) {
+func (db *myDB) CreateWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 	wco := models.WaterConsumption{
-		Device:      fiwareWCO.ID,
-		Consumption: fiwareWCO.WaterConsumption.Value,
+		Device:      device,
+		Consumption: consumption,
+		Timestamp:   timestamp,
 	}
-
-	timestamp, err := time.Parse(time.RFC3339, fiwareWCO.WaterConsumption.ObservedAt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse time from string: %s", err.Error())
-	}
-
-	wco.Timestamp = timestamp
 
 	result := db.impl.Create(&wco)
 	if result.Error != nil {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/diwise/ngsi-ld-golang/pkg/datamodels/fiware"
 	"github.com/go-chi/chi"
@@ -76,7 +77,12 @@ func (wca *waterConsumptionApp) createNewWaterConsumption() http.HandlerFunc {
 			wca.log.Error().Err(err).Msg("failed to unmarshal request body into fiware entity")
 		}
 
-		_, err = wca.db.CreateWaterConsumption(&fiwareWCO)
+		timestamp, err := time.Parse(time.RFC3339, fiwareWCO.WaterConsumption.ObservedAt)
+		if err != nil {
+			wca.log.Error().Err(err).Msg("failed to parse time from string")
+		}
+
+		_, err = wca.db.CreateWaterConsumption(fiwareWCO.ID, fiwareWCO.WaterConsumption.Value, timestamp)
 		if err != nil {
 			wca.log.Error().Err(err).Msgf("failed to create new entry in database because: %s", err.Error())
 		}
