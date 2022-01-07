@@ -1,10 +1,13 @@
 package database
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/models"
+	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -17,6 +20,13 @@ type Datastore interface {
 type myDB struct {
 	impl *gorm.DB
 	log  zerolog.Logger
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
 
 //ConnectorFunc is used to inject a database connection method into NewDatabaseConnection
@@ -34,6 +44,43 @@ func NewSQLiteConnector(log zerolog.Logger) ConnectorFunc {
 		}
 
 		return db, log, err
+	}
+}
+
+//NewPostgreSQLConnector opens a connection to a postgresql database
+func NewPostgreSQLConnector(log zerolog.Logger) ConnectorFunc {
+	dbHost := os.Getenv("DIWISE_SQLDB_HOST")
+	username := os.Getenv("DIWISE_SQLDB_USER")
+	dbName := os.Getenv("DIWISE_SQLDB_NAME")
+	password := os.Getenv("DIWISE_SQLDB_PASSWORD")
+	sslMode := getEnv("DIWISE_SQLDB_SSLMODE", "disable")
+
+	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=%s password=%s", dbHost, username, dbName, sslMode, password)
+
+	return func() (*gorm.DB, zerolog.Logger, error) {
+		sublogger := log.With().Str("host", dbHost).Str("database", dbName).Logger()
+
+		for {
+			sublogger.Info().Msg("connecting to database host")
+			db, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{
+				Logger: logger.New(
+					&sublogger,
+					logger.Config{
+						SlowThreshold:             time.Second,
+						LogLevel:                  logger.Info,
+						IgnoreRecordNotFoundError: false,
+						Colorful:                  false,
+					},
+				),
+			})
+
+			if err != nil {
+				sublogger.Fatal().Msg("failed to connect to database")
+				time.Sleep(3 * time.Second)
+			} else {
+				return db, sublogger, nil
+			}
+		}
 	}
 }
 

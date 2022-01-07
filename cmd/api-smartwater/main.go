@@ -19,7 +19,7 @@ func main() {
 	logger := log.With().Str("service", strings.ToLower(serviceName)).Logger()
 	logger.Info().Msg("starting up ...")
 
-	db, err := database.NewDatabaseConnection(database.NewSQLiteConnector(logger))
+	db, err := database.NewDatabaseConnection(database.NewPostgreSQLConnector(logger))
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to connect to database, shutting down... ")
 	}
