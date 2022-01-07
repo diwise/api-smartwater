@@ -3,8 +3,8 @@ package application
 import (
 	"time"
 
+	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/database"
 	"github.com/rs/zerolog"
-	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/database"
 )
 
 type Application interface {

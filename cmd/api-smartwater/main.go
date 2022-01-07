@@ -5,12 +5,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/diwise/api-smartwater/internal/pkg/_presentation/api"
+	"github.com/diwise/api-smartwater/internal/pkg/application"
+	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/database"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/httplog"
 	"github.com/rs/zerolog/log"
-	"github.com/sundsvall/api-smartwater/internal/pkg/_presentation/api"
-	"github.com/sundsvall/api-smartwater/internal/pkg/application"
-	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/database"
 )
 
 func main() {

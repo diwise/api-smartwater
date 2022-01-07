@@ -10,12 +10,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/diwise/api-smartwater/internal/pkg/application"
+	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/database"
 	"github.com/diwise/ngsi-ld-golang/pkg/datamodels/fiware"
 	"github.com/go-chi/chi"
 	"github.com/matryer/is"
 	"github.com/rs/zerolog/log"
-	"github.com/sundsvall/api-smartwater/internal/pkg/application"
-	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/database"
 )
 
 func newRouterForTesting() chi.Router {

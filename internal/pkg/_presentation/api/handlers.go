@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/diwise/api-smartwater/internal/pkg/application"
 	"github.com/diwise/ngsi-ld-golang/pkg/datamodels/fiware"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog"
-	"github.com/sundsvall/api-smartwater/internal/pkg/application"
 )
 
 func RegisterHandlers(r chi.Router, app application.Application, log zerolog.Logger) error {

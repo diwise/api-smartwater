@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/models"
 	"github.com/rs/zerolog"
-	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

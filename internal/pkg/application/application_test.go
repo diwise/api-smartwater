@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/database"
+	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/models"
 	"github.com/matryer/is"
 	"github.com/rs/zerolog/log"
-	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/database"
-	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/models"
 )
 
 func newAppForTesting() (*database.DatastoreMock, Application) {

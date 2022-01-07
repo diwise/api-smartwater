@@ -1,4 +1,4 @@
-module github.com/sundsvall/api-smartwater
+module github.com/diwise/api-smartwater
 
 go 1.17
 
@@ -12,6 +12,7 @@ require (
 	github.com/diwise/ngsi-ld-golang v0.0.0-20220105132415-d5a9f42c7645
 	github.com/go-chi/chi v1.5.4
 	github.com/matryer/is v1.4.0
+	gorm.io/driver/postgres v1.2.3
 	gorm.io/driver/sqlite v1.2.6
 	gorm.io/gorm v1.22.4
 )
@@ -31,5 +32,4 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.9 // indirect
 	golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gorm.io/driver/postgres v1.2.3 // indirect
 )

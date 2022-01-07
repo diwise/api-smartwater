@@ -4,7 +4,7 @@
 package database
 
 import (
-	"github.com/sundsvall/api-smartwater/internal/pkg/infrastructure/repositories/models"
+	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/models"
 	"sync"
 	"time"
 )
