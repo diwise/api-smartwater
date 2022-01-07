@@ -2,8 +2,11 @@ package application
 
 import (
 	"compress/flate"
+	"encoding/json"
+	"io"
 	"net/http"
 
+	"github.com/diwise/ngsi-ld-golang/pkg/datamodels/fiware"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/httplog"
@@ -63,8 +66,20 @@ func newWaterConsumptionApp(r chi.Router, db database.Datastore, log zerolog.Log
 	return w
 }
 
-func (w *waterConsumptionApp) createNewWaterConsumption() http.HandlerFunc {
+func (wca *waterConsumptionApp) createNewWaterConsumption() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fiwareWCO := fiware.WaterConsumptionObserved{}
+
+		jsonBytes, _ := io.ReadAll(r.Body)
+		err := json.Unmarshal(jsonBytes, &fiwareWCO)
+		if err != nil {
+			wca.log.Error().Err(err).Msg("failed to unmarshal request body into fiware entity")
+		}
+
+		_, err = wca.db.CreateWaterConsumption(&fiwareWCO)
+		if err != nil {
+			wca.log.Error().Err(err).Msgf("failed to create new entry in database because: %s", err.Error())
+		}
 
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Add("Content-Type", "application/json+ld")

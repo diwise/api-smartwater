@@ -17,10 +17,12 @@ func main() {
 	logger.Info().Msg("starting up ...")
 
 	r := chi.NewRouter()
-	db, err := database.NewDatabaseConnection(database.NewSQLiteConnector(logger), logger)
+
+	db, err := database.NewDatabaseConnection(database.NewSQLiteConnector(logger))
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to connect to database, shutting down... ")
 	}
+
 	app := application.NewApplication(r, db, logger, serviceName)
 
 	port := os.Getenv("SERVICE_PORT")

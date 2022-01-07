@@ -9,6 +9,6 @@ import (
 type WaterConsumption struct {
 	gorm.Model
 	Device      string
-	Consumption int
+	Consumption float64
 	Timestamp   time.Time
 }
