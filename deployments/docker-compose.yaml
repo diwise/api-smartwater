@@ -1,0 +1,32 @@
+version: '3'
+services:
+  smartwater:
+    image: 'diwise/api-smartwater:latest'
+    build:
+      context: ..
+      dockerfile: ./deployments/Dockerfile
+    restart: always
+    depends_on:
+      - postgresdb
+    links:
+      - postgresdb
+    environment:
+      DIWISE_SQLDB_HOST: 'postgresdb'
+      DIWISE_SQLDB_USER: 'testuser'
+      DIWISE_SQLDB_NAME: 'smartwater'
+      DIWISE_SQLDB_PASSWORD: 'testpass'
+      DIWISE_SQLDB_SSLMODE: 'disable'
+      SERVICE_PORT: '8090'
+      
+    ports:
+      - '8090:8090'
+
+  postgresdb:
+    image: 'ghcr.io/diwise/test-db-postgresql:prod-824e7cffd65dd3766c88441a48cffd5b2acd55f2'
+    restart: always
+    environment:
+      POSTGRES_DB: 'smartwater'
+      POSTGRES_USER: 'testuser'
+      POSTGRES_PASSWORD: 'testpass'
+    ports:
+      - '5432'
