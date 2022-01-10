@@ -14,6 +14,7 @@ import (
 )
 
 type Datastore interface {
+	GetWaterConsumptions(deviceId string, from, to time.Time, limit uint64) ([]models.WaterConsumption, error)
 	StoreWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
 }
 
@@ -103,6 +104,29 @@ func NewDatabaseConnection(connect ConnectorFunc) (Datastore, error) {
 	return db, nil
 }
 
+func (db *myDB) GetWaterConsumptions(deviceId string, from, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
+	wcos := []models.WaterConsumption{}
+	gorm := db.impl.Order("timestamp")
+
+	if deviceId != "" {
+		gorm = gorm.Where("device = ?", deviceId)
+	}
+
+	if !from.IsZero() || !to.IsZero() {
+		gorm = insertTemporalSQL(gorm, "timestamp", from, to)
+		if gorm.Error != nil {
+			return nil, gorm.Error
+		}
+	}
+
+	result := gorm.Limit(int(limit)).Find(&wcos)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return wcos, nil
+}
+
 func (db *myDB) StoreWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 	wco := models.WaterConsumption{
 		Device:      device,
@@ -116,4 +140,19 @@ func (db *myDB) StoreWaterConsumption(device string, consumption float64, timest
 	}
 
 	return &wco, nil
+}
+
+func insertTemporalSQL(gorm *gorm.DB, property string, from, to time.Time) *gorm.DB {
+	if !from.IsZero() {
+		gorm = gorm.Where(fmt.Sprintf("%s >= ?", property), from)
+		if gorm.Error != nil {
+			return gorm
+		}
+	}
+
+	if !to.IsZero() {
+		gorm = gorm.Where(fmt.Sprintf("%s < ?", property), to)
+	}
+
+	return gorm
 }
