@@ -111,7 +111,7 @@ func (cs contextSource) UpdateEntityAttributes(entityID string, req ngsi.Request
 
 func getWaterConsumptions(app application.Application, query ngsi.Query) ([]models.WaterConsumption, error) {
 	deviceId := ""
-	if query.Device() != "" {
+	if query.HasDeviceReference() {
 		deviceId = strings.TrimPrefix(query.Device(), fiware.WaterConsumptionObservedIDPrefix)
 	}
 

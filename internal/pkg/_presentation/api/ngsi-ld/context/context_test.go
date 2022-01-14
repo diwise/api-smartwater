@@ -2,7 +2,6 @@ package context
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -19,8 +18,7 @@ import (
 
 func TestCreateEntityWorks(t *testing.T) {
 
-	bodyContents, _ := json.Marshal(wcoJson)
-	req, _ := http.NewRequest("POST", "http://localhost:8090/ngsi-ld/v1/entities", bytes.NewBuffer(bodyContents))
+	req, _ := http.NewRequest("POST", "http://localhost:8090/ngsi-ld/v1/entities", bytes.NewBuffer([]byte(wcoJson)))
 	w := httptest.NewRecorder()
 
 	is, ctxReg := testSetup(t)
@@ -47,9 +45,18 @@ func TestRetrieveEntities(t *testing.T) {
 
 func testSetup(t *testing.T) (*is.I, ngsi.ContextRegistry) {
 	is := is.New(t)
+
+	wcos := []models.WaterConsumption{
+		{
+			Device:      "device",
+			Consumption: 172.0,
+			Timestamp:   time.Now().UTC(),
+		},
+	}
+
 	db := &database.DatastoreMock{
 		GetWaterConsumptionsFunc: func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
-			return nil, nil
+			return wcos, nil
 		},
 		StoreWaterConsumptionFunc: func(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 			return nil, nil

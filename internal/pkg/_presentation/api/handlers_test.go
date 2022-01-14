@@ -57,5 +57,4 @@ func TestWaterConsumptionHandler(t *testing.T) {
 
 	resp, _ := newTestRequest(is, ts, "POST", "/ngsi-ld/v1/entities", bytes.NewBuffer(wcoJson))
 	is.Equal(resp.StatusCode, http.StatusCreated) // Check status code
-
 }
