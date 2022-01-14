@@ -2,7 +2,6 @@ package context
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,8 +24,6 @@ func TestCreateEntityWorks(t *testing.T) {
 
 	ngsi.NewCreateEntityHandler(ctxReg).ServeHTTP(w, req)
 
-	fmt.Println(w.Body.String())
-
 	is.Equal(w.Code, http.StatusCreated)
 }
 
@@ -37,8 +34,6 @@ func TestRetrieveEntities(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ngsi.NewQueryEntitiesHandler(ctxReg).ServeHTTP(w, req)
-
-	fmt.Println(w.Body.String())
 
 	is.Equal(w.Code, http.StatusOK)
 }
