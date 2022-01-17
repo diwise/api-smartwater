@@ -9,9 +9,8 @@ import (
 	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/models"
 	"github.com/diwise/ngsi-ld-golang/pkg/datamodels/fiware"
 	"github.com/diwise/ngsi-ld-golang/pkg/ngsi-ld"
-	"github.com/diwise/ngsi-ld-golang/pkg/ngsi-ld/types"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	log "github.com/rs/zerolog/log"
 )
 
 type contextSource struct {
@@ -20,9 +19,7 @@ type contextSource struct {
 }
 
 //CreateSource instantiates and returns a Fiware ContextSource that wraps the provided db interface
-func CreateSource(app application.Application) ngsi.ContextSource {
-	log := log.Logger
-
+func CreateSource(app application.Application, log zerolog.Logger) ngsi.ContextSource {
 	return &contextSource{
 		app: app,
 		log: log,
@@ -30,10 +27,10 @@ func CreateSource(app application.Application) ngsi.ContextSource {
 }
 
 func (cs contextSource) CreateEntity(typeName, entityID string, req ngsi.Request) error {
+	sublogger := log.Logger
+	sublogger.With().Str("entityID", entityID).Str("entityType", typeName).Logger()
 
-	cs.log.With().Str("entityID", entityID).Str("entityType", typeName).Logger()
-
-	if typeName != "WaterConsumptionObserved" {
+	if typeName != fiware.WaterConsumptionObservedTypeName {
 		errorMessage := "entity type not supported"
 		cs.log.Error().Msg(errorMessage)
 		return errors.New(errorMessage)
@@ -42,17 +39,17 @@ func (cs contextSource) CreateEntity(typeName, entityID string, req ngsi.Request
 	wco := &fiware.WaterConsumptionObserved{}
 	err := req.DecodeBodyInto(wco)
 	if err != nil {
-		return err // TODO: fix later
+		return err
 	}
 
 	observedAt, err := time.Parse(time.RFC3339, wco.WaterConsumption.ObservedAt)
 	if err != nil {
-		return err // TODO: fix later
+		return err
 	}
 
 	err = cs.app.UpdateWaterConsumption(wco.ID, wco.WaterConsumption.Value, observedAt)
 	if err != nil {
-		return err // TODO: fix later
+		return err
 	}
 
 	return err
@@ -67,15 +64,14 @@ func (cs contextSource) GetEntities(query ngsi.Query, callback ngsi.QueryEntitie
 
 	waterconsumptions, err := getWaterConsumptions(cs.app, query)
 	if err != nil {
-		return err // TODO: fix later
+		return err
 	}
 
 	for _, w := range waterconsumptions {
 		entity := fiware.NewWaterConsumptionObserved(w.Device)
-		entity.WaterConsumption = &fiware.WCONumberProperty{
-			NumberProperty: *types.NewNumberProperty(w.Consumption),
-			ObservedAt:     w.Timestamp.Format(time.RFC3339),
-		}
+
+		entity.WithConsumption(w.Device, w.Consumption, w.Timestamp)
+
 		err = callback(entity)
 		if err != nil {
 			break
@@ -86,7 +82,11 @@ func (cs contextSource) GetEntities(query ngsi.Query, callback ngsi.QueryEntitie
 }
 
 func (cs contextSource) GetProvidedTypeFromID(entityID string) (string, error) {
-	return "", errors.New("not implemented")
+	if cs.ProvidesEntitiesWithMatchingID(entityID) {
+		return fiware.WaterConsumptionObservedTypeName, nil
+	}
+
+	return "", errors.New("no entities found with matching type")
 }
 
 func (cs contextSource) ProvidesAttribute(attributeName string) bool {
@@ -94,11 +94,11 @@ func (cs contextSource) ProvidesAttribute(attributeName string) bool {
 }
 
 func (cs contextSource) ProvidesEntitiesWithMatchingID(entityID string) bool {
-	return strings.HasPrefix(entityID, "urn:ngsi-ld:WaterConsumptionObserved:")
+	return strings.HasPrefix(entityID, fiware.WaterConsumptionObservedIDPrefix)
 }
 
 func (cs contextSource) ProvidesType(typeName string) bool {
-	return typeName == "WaterConsumptionObserved"
+	return typeName == fiware.WaterConsumptionObservedTypeName
 }
 
 func (cs contextSource) RetrieveEntity(entityID string, request ngsi.Request) (ngsi.Entity, error) {
@@ -112,7 +112,7 @@ func (cs contextSource) UpdateEntityAttributes(entityID string, req ngsi.Request
 func getWaterConsumptions(app application.Application, query ngsi.Query) ([]models.WaterConsumption, error) {
 	deviceId := ""
 	if query.HasDeviceReference() {
-		deviceId = strings.TrimPrefix(query.Device(), fiware.WaterConsumptionObservedIDPrefix)
+		deviceId = strings.TrimPrefix(query.Device(), fiware.DeviceIDPrefix)
 	}
 
 	from := time.Time{}

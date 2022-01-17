@@ -13,9 +13,9 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func createContextRegistry(app application.Application) ngsi.ContextRegistry {
+func createContextRegistry(app application.Application, log zerolog.Logger) ngsi.ContextRegistry {
 	contextRegistry := ngsi.NewContextRegistry()
-	ctxSource := context.CreateSource(app)
+	ctxSource := context.CreateSource(app, log)
 	contextRegistry.Register(ctxSource)
 	return contextRegistry
 }
@@ -36,7 +36,7 @@ func RegisterHandlers(r chi.Router, app application.Application, log zerolog.Log
 		w.WriteHeader(http.StatusOK)
 	})
 
-	ctxReg := createContextRegistry(app)
+	ctxReg := createContextRegistry(app, log)
 
 	r.Post("/ngsi-ld/v1/entities", ngsi.NewCreateEntityHandler(ctxReg))
 	r.Get("/ngsi-ld/v1/entities", ngsi.NewQueryEntitiesHandler(ctxReg))

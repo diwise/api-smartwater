@@ -8,27 +8,28 @@ import (
 	"time"
 
 	"github.com/diwise/api-smartwater/internal/pkg/application"
-	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/database"
 	"github.com/diwise/api-smartwater/internal/pkg/infrastructure/repositories/models"
 	"github.com/diwise/ngsi-ld-golang/pkg/ngsi-ld"
 	"github.com/matryer/is"
 	"github.com/rs/zerolog/log"
 )
 
-func TestCreateEntityWorks(t *testing.T) {
+func TestUpdateWaterConsumption(t *testing.T) {
 
 	req, _ := http.NewRequest("POST", "http://localhost:8090/ngsi-ld/v1/entities", bytes.NewBuffer([]byte(wcoJson)))
 	w := httptest.NewRecorder()
 
-	is, ctxReg := testSetup(t)
+	is, app, ctxReg := testSetup(t)
 
 	ngsi.NewCreateEntityHandler(ctxReg).ServeHTTP(w, req)
 
 	is.Equal(w.Code, http.StatusCreated)
+	is.Equal(len(app.UpdateWaterConsumptionCalls()), 1)
+	is.Equal(app.UpdateWaterConsumptionCalls()[0].Consumption, float64(191051))
 }
 
 func TestRetrieveEntities(t *testing.T) {
-	is, ctxReg := testSetup(t)
+	is, app, ctxReg := testSetup(t)
 
 	req, _ := http.NewRequest("GET", "http://localhost:8090/ngsi-ld/v1/entities?type=WaterConsumptionObserved", nil)
 	w := httptest.NewRecorder()
@@ -36,35 +37,27 @@ func TestRetrieveEntities(t *testing.T) {
 	ngsi.NewQueryEntitiesHandler(ctxReg).ServeHTTP(w, req)
 
 	is.Equal(w.Code, http.StatusOK)
+	is.Equal(len(app.RetrieveWaterConsumptionsCalls()), 1)
 }
 
-func testSetup(t *testing.T) (*is.I, ngsi.ContextRegistry) {
+func testSetup(t *testing.T) (*is.I, *application.ApplicationMock, ngsi.ContextRegistry) {
 	is := is.New(t)
 
-	wcos := []models.WaterConsumption{
-		{
-			Device:      "device",
-			Consumption: 172.0,
-			Timestamp:   time.Now().UTC(),
-		},
-	}
-
-	db := &database.DatastoreMock{
-		GetWaterConsumptionsFunc: func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
-			return wcos, nil
-		},
-		StoreWaterConsumptionFunc: func(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
+	log := log.Logger
+	app := &application.ApplicationMock{
+		RetrieveWaterConsumptionsFunc: func(deviceId string, from, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
 			return nil, nil
 		},
+		UpdateWaterConsumptionFunc: func(device string, consumption float64, timestamp time.Time) error {
+			return nil
+		},
 	}
-	log := log.Logger
-	app := application.NewApplication(db, log, "api-smartwater")
 
 	ctxReg := ngsi.NewContextRegistry()
-	ctxSource := CreateSource(app)
+	ctxSource := CreateSource(app, log)
 	ctxReg.Register(ctxSource)
 
-	return is, ctxReg
+	return is, app, ctxReg
 }
 
 const wcoJson string = `{

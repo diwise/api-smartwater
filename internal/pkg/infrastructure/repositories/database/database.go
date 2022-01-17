@@ -113,7 +113,7 @@ func (db *myDB) GetWaterConsumptions(deviceId string, from, to time.Time, limit 
 	}
 
 	if !from.IsZero() || !to.IsZero() {
-		gorm = insertTemporalSQL(gorm, "timestamp", from, to)
+		gorm = insertTemporalSQL(gorm, "timestamp", from, to) //make sure to set to Descending order
 		if gorm.Error != nil {
 			return nil, gorm.Error
 		}
