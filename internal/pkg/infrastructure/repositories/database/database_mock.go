@@ -19,6 +19,9 @@ var _ Datastore = &DatastoreMock{}
 //
 // 		// make and configure a mocked Datastore
 // 		mockedDatastore := &DatastoreMock{
+// 			GetWaterConsumptionsFunc: func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
+// 				panic("mock out the GetWaterConsumptions method")
+// 			},
 // 			StoreWaterConsumptionFunc: func(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 // 				panic("mock out the StoreWaterConsumption method")
 // 			},
@@ -29,11 +32,25 @@ var _ Datastore = &DatastoreMock{}
 //
 // 	}
 type DatastoreMock struct {
+	// GetWaterConsumptionsFunc mocks the GetWaterConsumptions method.
+	GetWaterConsumptionsFunc func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error)
+
 	// StoreWaterConsumptionFunc mocks the StoreWaterConsumption method.
 	StoreWaterConsumptionFunc func(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// GetWaterConsumptions holds details about calls to the GetWaterConsumptions method.
+		GetWaterConsumptions []struct {
+			// DeviceId is the deviceId argument value.
+			DeviceId string
+			// From is the from argument value.
+			From time.Time
+			// To is the to argument value.
+			To time.Time
+			// Limit is the limit argument value.
+			Limit uint64
+		}
 		// StoreWaterConsumption holds details about calls to the StoreWaterConsumption method.
 		StoreWaterConsumption []struct {
 			// Device is the device argument value.
@@ -44,7 +61,51 @@ type DatastoreMock struct {
 			Timestamp time.Time
 		}
 	}
+	lockGetWaterConsumptions  sync.RWMutex
 	lockStoreWaterConsumption sync.RWMutex
+}
+
+// GetWaterConsumptions calls GetWaterConsumptionsFunc.
+func (mock *DatastoreMock) GetWaterConsumptions(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
+	if mock.GetWaterConsumptionsFunc == nil {
+		panic("DatastoreMock.GetWaterConsumptionsFunc: method is nil but Datastore.GetWaterConsumptions was just called")
+	}
+	callInfo := struct {
+		DeviceId string
+		From     time.Time
+		To       time.Time
+		Limit    uint64
+	}{
+		DeviceId: deviceId,
+		From:     from,
+		To:       to,
+		Limit:    limit,
+	}
+	mock.lockGetWaterConsumptions.Lock()
+	mock.calls.GetWaterConsumptions = append(mock.calls.GetWaterConsumptions, callInfo)
+	mock.lockGetWaterConsumptions.Unlock()
+	return mock.GetWaterConsumptionsFunc(deviceId, from, to, limit)
+}
+
+// GetWaterConsumptionsCalls gets all the calls that were made to GetWaterConsumptions.
+// Check the length with:
+//     len(mockedDatastore.GetWaterConsumptionsCalls())
+func (mock *DatastoreMock) GetWaterConsumptionsCalls() []struct {
+	DeviceId string
+	From     time.Time
+	To       time.Time
+	Limit    uint64
+} {
+	var calls []struct {
+		DeviceId string
+		From     time.Time
+		To       time.Time
+		Limit    uint64
+	}
+	mock.lockGetWaterConsumptions.RLock()
+	calls = mock.calls.GetWaterConsumptions
+	mock.lockGetWaterConsumptions.RUnlock()
+	return calls
 }
 
 // StoreWaterConsumption calls StoreWaterConsumptionFunc.

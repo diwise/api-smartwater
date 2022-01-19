@@ -9,7 +9,7 @@ require (
 )
 
 require (
-	github.com/diwise/ngsi-ld-golang v0.0.0-20220105132415-d5a9f42c7645
+	github.com/diwise/ngsi-ld-golang v0.0.0-20220114121841-72d76f478a04
 	github.com/go-chi/chi v1.5.4
 	github.com/matryer/is v1.4.0
 	gorm.io/driver/postgres v1.2.3
@@ -19,6 +19,7 @@ require (
 
 require (
 	github.com/go-chi/chi/v5 v5.0.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
