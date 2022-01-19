@@ -36,9 +36,9 @@ func TestRetrievingAllStoredWaterConsumptionReadings(t *testing.T) {
 func TestRetrievingWaterConsumptionsWithinTimespan(t *testing.T) {
 	is, db := setupTest(t)
 
-	time1 := time.Now().UTC()
-	time2 := time.Now().UTC().Add(2 * time.Hour)
-	time3 := time.Now().UTC().Add(3 * time.Hour)
+	time1 := time.Now().UTC().Add(-3 * time.Hour)
+	time2 := time.Now().UTC().Add(-2 * time.Hour)
+	time3 := time.Now().UTC()
 
 	db.StoreWaterConsumption("deviceId", 176.0, time1)
 	db.StoreWaterConsumption("deviceId", 1799.0, time2)
@@ -47,7 +47,8 @@ func TestRetrievingWaterConsumptionsWithinTimespan(t *testing.T) {
 	result, err := db.GetWaterConsumptions("", time1, time3, 0)
 
 	is.NoErr(err)
-	is.Equal(len(result), 2) // should equal 2
+	is.Equal(len(result), 2)             // should equal 2
+	is.Equal(result[0].Timestamp, time2) // should be most recent entry by timestamp
 }
 
 func setupTest(t *testing.T) (*is.I, Datastore) {

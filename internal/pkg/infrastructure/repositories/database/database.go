@@ -106,14 +106,14 @@ func NewDatabaseConnection(connect ConnectorFunc) (Datastore, error) {
 
 func (db *myDB) GetWaterConsumptions(deviceId string, from, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
 	wcos := []models.WaterConsumption{}
-	gorm := db.impl.Order("timestamp")
+	gorm := db.impl.Order("timestamp DESC")
 
 	if deviceId != "" {
 		gorm = gorm.Where("device = ?", deviceId)
 	}
 
 	if !from.IsZero() || !to.IsZero() {
-		gorm = insertTemporalSQL(gorm, "timestamp", from, to) //make sure to set to Descending order
+		gorm = insertTemporalSQL(gorm, "timestamp", from, to)
 		if gorm.Error != nil {
 			return nil, gorm.Error
 		}

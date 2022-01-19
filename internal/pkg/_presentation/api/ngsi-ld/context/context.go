@@ -2,6 +2,7 @@ package context
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/diwise/ngsi-ld-golang/pkg/datamodels/fiware"
 	"github.com/diwise/ngsi-ld-golang/pkg/ngsi-ld"
 	"github.com/rs/zerolog"
-	log "github.com/rs/zerolog/log"
 )
 
 type contextSource struct {
@@ -18,7 +18,7 @@ type contextSource struct {
 	log zerolog.Logger
 }
 
-//CreateSource instantiates and returns a Fiware ContextSource that wraps the provided db interface
+//CreateSource instantiates and returns a Fiware ContextSource that wraps the provided application interface
 func CreateSource(app application.Application, log zerolog.Logger) ngsi.ContextSource {
 	return &contextSource{
 		app: app,
@@ -27,11 +27,8 @@ func CreateSource(app application.Application, log zerolog.Logger) ngsi.ContextS
 }
 
 func (cs contextSource) CreateEntity(typeName, entityID string, req ngsi.Request) error {
-	sublogger := log.Logger
-	sublogger.With().Str("entityID", entityID).Str("entityType", typeName).Logger()
-
 	if typeName != fiware.WaterConsumptionObservedTypeName {
-		errorMessage := "entity type not supported"
+		errorMessage := fmt.Sprintf("entity type %s not supported", typeName)
 		cs.log.Error().Msg(errorMessage)
 		return errors.New(errorMessage)
 	}
@@ -47,10 +44,7 @@ func (cs contextSource) CreateEntity(typeName, entityID string, req ngsi.Request
 		return err
 	}
 
-	err = cs.app.UpdateWaterConsumption(wco.ID, wco.WaterConsumption.Value, observedAt)
-	if err != nil {
-		return err
-	}
+	err = cs.app.UpdateWaterConsumption(entityID, wco.WaterConsumption.Value, observedAt)
 
 	return err
 }
@@ -68,9 +62,7 @@ func (cs contextSource) GetEntities(query ngsi.Query, callback ngsi.QueryEntitie
 	}
 
 	for _, w := range waterconsumptions {
-		entity := fiware.NewWaterConsumptionObserved(w.Device)
-
-		entity.WithConsumption(w.Device, w.Consumption, w.Timestamp)
+		entity := fiware.NewWaterConsumptionObserved(w.Device).WithConsumption(w.Device, w.Consumption, w.Timestamp)
 
 		err = callback(entity)
 		if err != nil {

@@ -16,7 +16,7 @@ import (
 
 func TestUpdateWaterConsumption(t *testing.T) {
 
-	req, _ := http.NewRequest("POST", "http://localhost:8090/ngsi-ld/v1/entities", bytes.NewBuffer([]byte(wcoJson)))
+	req, _ := http.NewRequest("POST", "/ngsi-ld/v1/entities", bytes.NewBuffer([]byte(wcoJson)))
 	w := httptest.NewRecorder()
 
 	is, app, ctxReg := testSetup(t)
@@ -31,7 +31,7 @@ func TestUpdateWaterConsumption(t *testing.T) {
 func TestRetrieveEntities(t *testing.T) {
 	is, app, ctxReg := testSetup(t)
 
-	req, _ := http.NewRequest("GET", "http://localhost:8090/ngsi-ld/v1/entities?type=WaterConsumptionObserved", nil)
+	req, _ := http.NewRequest("GET", "/ngsi-ld/v1/entities?type=WaterConsumptionObserved", nil)
 	w := httptest.NewRecorder()
 
 	ngsi.NewQueryEntitiesHandler(ctxReg).ServeHTTP(w, req)
