@@ -22,7 +22,7 @@ var _ Datastore = &DatastoreMock{}
 // 			GetWaterConsumptionsFunc: func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
 // 				panic("mock out the GetWaterConsumptions method")
 // 			},
-// 			StoreWaterConsumptionFunc: func(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
+// 			StoreWaterConsumptionFunc: func(entityId string, device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 // 				panic("mock out the StoreWaterConsumption method")
 // 			},
 // 		}
@@ -36,7 +36,7 @@ type DatastoreMock struct {
 	GetWaterConsumptionsFunc func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error)
 
 	// StoreWaterConsumptionFunc mocks the StoreWaterConsumption method.
-	StoreWaterConsumptionFunc func(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
+	StoreWaterConsumptionFunc func(entityId string, device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -53,6 +53,8 @@ type DatastoreMock struct {
 		}
 		// StoreWaterConsumption holds details about calls to the StoreWaterConsumption method.
 		StoreWaterConsumption []struct {
+			// EntityId is the entityId argument value.
+			EntityId string
 			// Device is the device argument value.
 			Device string
 			// Consumption is the consumption argument value.
@@ -109,15 +111,17 @@ func (mock *DatastoreMock) GetWaterConsumptionsCalls() []struct {
 }
 
 // StoreWaterConsumption calls StoreWaterConsumptionFunc.
-func (mock *DatastoreMock) StoreWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
+func (mock *DatastoreMock) StoreWaterConsumption(entityId string, device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 	if mock.StoreWaterConsumptionFunc == nil {
 		panic("DatastoreMock.StoreWaterConsumptionFunc: method is nil but Datastore.StoreWaterConsumption was just called")
 	}
 	callInfo := struct {
+		EntityId    string
 		Device      string
 		Consumption float64
 		Timestamp   time.Time
 	}{
+		EntityId:    entityId,
 		Device:      device,
 		Consumption: consumption,
 		Timestamp:   timestamp,
@@ -125,18 +129,20 @@ func (mock *DatastoreMock) StoreWaterConsumption(device string, consumption floa
 	mock.lockStoreWaterConsumption.Lock()
 	mock.calls.StoreWaterConsumption = append(mock.calls.StoreWaterConsumption, callInfo)
 	mock.lockStoreWaterConsumption.Unlock()
-	return mock.StoreWaterConsumptionFunc(device, consumption, timestamp)
+	return mock.StoreWaterConsumptionFunc(entityId, device, consumption, timestamp)
 }
 
 // StoreWaterConsumptionCalls gets all the calls that were made to StoreWaterConsumption.
 // Check the length with:
 //     len(mockedDatastore.StoreWaterConsumptionCalls())
 func (mock *DatastoreMock) StoreWaterConsumptionCalls() []struct {
+	EntityId    string
 	Device      string
 	Consumption float64
 	Timestamp   time.Time
 } {
 	var calls []struct {
+		EntityId    string
 		Device      string
 		Consumption float64
 		Timestamp   time.Time

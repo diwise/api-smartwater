@@ -11,7 +11,7 @@ import (
 func TestThatStoreWaterConsumptionDoesNotReturnError(t *testing.T) {
 	is, db := setupTest(t)
 
-	_, err := db.StoreWaterConsumption("deviceId", 176.0, time.Now().UTC())
+	_, err := db.StoreWaterConsumption("entityId", "deviceId", 176.0, time.Now().UTC())
 
 	is.NoErr(err) // error when storing new water consumption
 }
@@ -23,9 +23,9 @@ func TestRetrievingAllStoredWaterConsumptionReadings(t *testing.T) {
 	time2 := time.Now().UTC().Add(2 * time.Hour)
 	time3 := time.Now().UTC().Add(3 * time.Hour)
 
-	db.StoreWaterConsumption("deviceId", 176.0, time1)
-	db.StoreWaterConsumption("deviceId", 1799.0, time2)
-	db.StoreWaterConsumption("deviceId", 17.0, time3)
+	db.StoreWaterConsumption("entityId", "deviceId", 176.0, time1)
+	db.StoreWaterConsumption("entityId", "deviceId", 1799.0, time2)
+	db.StoreWaterConsumption("entityId", "deviceId", 17.0, time3)
 
 	result, err := db.GetWaterConsumptions("", time.Time{}, time.Time{}, 0)
 
@@ -40,9 +40,9 @@ func TestRetrievingWaterConsumptionsWithinTimespan(t *testing.T) {
 	time2 := time.Now().UTC().Add(-2 * time.Hour)
 	time3 := time.Now().UTC()
 
-	db.StoreWaterConsumption("deviceId", 176.0, time1)
-	db.StoreWaterConsumption("deviceId", 1799.0, time2)
-	db.StoreWaterConsumption("deviceId2", 17.0, time3)
+	db.StoreWaterConsumption("entityId", "deviceId", 176.0, time1)
+	db.StoreWaterConsumption("entityId", "deviceId", 1799.0, time2)
+	db.StoreWaterConsumption("entityId", "deviceId", 17.0, time3)
 
 	result, err := db.GetWaterConsumptions("", time1, time3, 0)
 

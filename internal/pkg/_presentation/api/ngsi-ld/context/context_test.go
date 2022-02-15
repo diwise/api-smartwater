@@ -26,6 +26,7 @@ func TestUpdateWaterConsumption(t *testing.T) {
 	is.Equal(w.Code, http.StatusCreated)
 	is.Equal(len(app.UpdateWaterConsumptionCalls()), 1)
 	is.Equal(app.UpdateWaterConsumptionCalls()[0].Consumption, float64(191051))
+	is.Equal(app.UpdateWaterConsumptionCalls()[0].Device, "testDevice01")
 }
 
 func TestRetrieveEntities(t *testing.T) {
@@ -67,7 +68,7 @@ const wcoJson string = `{
         "type": "Property",
         "observedBy": {
             "type": "Relationship",
-            "object": "urn:ngsi-ld:Device:01"
+            "object": "urn:ngsi-ld:Device:testDevice01"
         },
         "value": 191051,
         "observedAt": "2021-05-23T23:14:16.000Z",

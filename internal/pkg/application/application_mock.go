@@ -22,7 +22,7 @@ var _ Application = &ApplicationMock{}
 // 			RetrieveWaterConsumptionsFunc: func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
 // 				panic("mock out the RetrieveWaterConsumptions method")
 // 			},
-// 			UpdateWaterConsumptionFunc: func(device string, consumption float64, timestamp time.Time) error {
+// 			UpdateWaterConsumptionFunc: func(entityId string, device string, consumption float64, timestamp time.Time) error {
 // 				panic("mock out the UpdateWaterConsumption method")
 // 			},
 // 		}
@@ -36,7 +36,7 @@ type ApplicationMock struct {
 	RetrieveWaterConsumptionsFunc func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error)
 
 	// UpdateWaterConsumptionFunc mocks the UpdateWaterConsumption method.
-	UpdateWaterConsumptionFunc func(device string, consumption float64, timestamp time.Time) error
+	UpdateWaterConsumptionFunc func(entityId string, device string, consumption float64, timestamp time.Time) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -53,6 +53,8 @@ type ApplicationMock struct {
 		}
 		// UpdateWaterConsumption holds details about calls to the UpdateWaterConsumption method.
 		UpdateWaterConsumption []struct {
+			// EntityId is the entityId argument value.
+			EntityId string
 			// Device is the device argument value.
 			Device string
 			// Consumption is the consumption argument value.
@@ -109,15 +111,17 @@ func (mock *ApplicationMock) RetrieveWaterConsumptionsCalls() []struct {
 }
 
 // UpdateWaterConsumption calls UpdateWaterConsumptionFunc.
-func (mock *ApplicationMock) UpdateWaterConsumption(device string, consumption float64, timestamp time.Time) error {
+func (mock *ApplicationMock) UpdateWaterConsumption(entityId string, device string, consumption float64, timestamp time.Time) error {
 	if mock.UpdateWaterConsumptionFunc == nil {
 		panic("ApplicationMock.UpdateWaterConsumptionFunc: method is nil but Application.UpdateWaterConsumption was just called")
 	}
 	callInfo := struct {
+		EntityId    string
 		Device      string
 		Consumption float64
 		Timestamp   time.Time
 	}{
+		EntityId:    entityId,
 		Device:      device,
 		Consumption: consumption,
 		Timestamp:   timestamp,
@@ -125,18 +129,20 @@ func (mock *ApplicationMock) UpdateWaterConsumption(device string, consumption f
 	mock.lockUpdateWaterConsumption.Lock()
 	mock.calls.UpdateWaterConsumption = append(mock.calls.UpdateWaterConsumption, callInfo)
 	mock.lockUpdateWaterConsumption.Unlock()
-	return mock.UpdateWaterConsumptionFunc(device, consumption, timestamp)
+	return mock.UpdateWaterConsumptionFunc(entityId, device, consumption, timestamp)
 }
 
 // UpdateWaterConsumptionCalls gets all the calls that were made to UpdateWaterConsumption.
 // Check the length with:
 //     len(mockedApplication.UpdateWaterConsumptionCalls())
 func (mock *ApplicationMock) UpdateWaterConsumptionCalls() []struct {
+	EntityId    string
 	Device      string
 	Consumption float64
 	Timestamp   time.Time
 } {
 	var calls []struct {
+		EntityId    string
 		Device      string
 		Consumption float64
 		Timestamp   time.Time

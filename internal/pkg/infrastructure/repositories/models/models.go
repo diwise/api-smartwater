@@ -8,6 +8,7 @@ import (
 
 type WaterConsumption struct {
 	gorm.Model
+	WCOID       string
 	Device      string
 	Consumption float64
 	Timestamp   time.Time
