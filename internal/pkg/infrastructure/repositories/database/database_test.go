@@ -66,8 +66,8 @@ func TestThatItIsNotPossibleToSaveWaterConsumptionFromTheSameDeviceAtTheSameTime
 	db.StoreWaterConsumption("entityId123", "deviceId", 176.0, time)
 	_, err := db.StoreWaterConsumption("entityId456", "deviceId", 1799.0, time)
 
-	is.True(err != nil)
-	is.Equal(err.Error(), "UNIQUE constraint failed: water_consumptions.device, water_consumptions.timestamp")
+	is.True(err != nil)                                                                                        // error should not be nil
+	is.Equal(err.Error(), "UNIQUE constraint failed: water_consumptions.device, water_consumptions.timestamp") // error messages should match
 }
 
 func setupTest(t *testing.T) (*is.I, Datastore) {
