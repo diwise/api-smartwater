@@ -58,6 +58,18 @@ func TestRetrievingWaterConsumptionsWithinTimespan(t *testing.T) {
 	is.Equal(result[0].Timestamp, time2) // should be most recent entry by timestamp
 }
 
+func TestThatItIsNotPossibleToSaveWaterConsumptionFromTheSameDeviceAtTheSameTimestamp(t *testing.T) {
+	is, db := setupTest(t)
+
+	time := time.Now().UTC()
+
+	db.StoreWaterConsumption("entityId123", "deviceId", 176.0, time)
+	_, err := db.StoreWaterConsumption("entityId456", "deviceId", 1799.0, time)
+
+	is.True(err != nil)
+	is.Equal(err.Error(), "UNIQUE constraint failed: water_consumptions.device, water_consumptions.timestamp")
+}
+
 func setupTest(t *testing.T) (*is.I, Datastore) {
 	is := is.New(t)
 	log := log.Logger
