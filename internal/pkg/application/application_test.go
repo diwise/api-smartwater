@@ -23,7 +23,7 @@ func newAppForTesting() (*database.DatastoreMock, Application) {
 		GetWaterConsumptionsFunc: func(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error) {
 			return wcos, nil
 		},
-		StoreWaterConsumptionFunc: func(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
+		StoreWaterConsumptionFunc: func(entityId string, device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 			return nil, nil
 		},
 	}
@@ -35,7 +35,7 @@ func TestUpdateWaterConsumption(t *testing.T) {
 	is := is.New(t)
 	db, app := newAppForTesting()
 
-	err := app.UpdateWaterConsumption("device", 172.0, time.Now().UTC())
+	err := app.UpdateWaterConsumption("wcoID", "device", 172.0, time.Now().UTC())
 	is.NoErr(err)                                     // Check error
 	is.Equal(len(db.StoreWaterConsumptionCalls()), 1) // StoreWaterConsumption should have been called once
 }
@@ -44,7 +44,7 @@ func TestRetrieveWaterConsumption(t *testing.T) {
 	is := is.New(t)
 	db, app := newAppForTesting()
 
-	err := app.UpdateWaterConsumption("device", 172.0, time.Now().UTC())
+	err := app.UpdateWaterConsumption("wcoID", "device", 172.0, time.Now().UTC())
 	is.NoErr(err)                                     // Check error
 	is.Equal(len(db.StoreWaterConsumptionCalls()), 1) // StoreWaterConsumption should have been called once
 

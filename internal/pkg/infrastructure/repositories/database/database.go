@@ -15,7 +15,7 @@ import (
 
 type Datastore interface {
 	GetWaterConsumptions(deviceId string, from, to time.Time, limit uint64) ([]models.WaterConsumption, error)
-	StoreWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
+	StoreWaterConsumption(entityId, device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error)
 }
 
 type myDB struct {
@@ -127,8 +127,9 @@ func (db *myDB) GetWaterConsumptions(deviceId string, from, to time.Time, limit 
 	return wcos, nil
 }
 
-func (db *myDB) StoreWaterConsumption(device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
+func (db *myDB) StoreWaterConsumption(entityID, device string, consumption float64, timestamp time.Time) (*models.WaterConsumption, error) {
 	wco := models.WaterConsumption{
+		WCOID:       entityID,
 		Device:      device,
 		Consumption: consumption,
 		Timestamp:   timestamp,

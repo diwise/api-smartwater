@@ -10,7 +10,7 @@ import (
 
 type Application interface {
 	RetrieveWaterConsumptions(deviceId string, from time.Time, to time.Time, limit uint64) ([]models.WaterConsumption, error)
-	UpdateWaterConsumption(device string, consumption float64, timestamp time.Time) error
+	UpdateWaterConsumption(entityId, device string, consumption float64, timestamp time.Time) error
 }
 
 type waterConsumptionApp struct {
@@ -40,8 +40,8 @@ func (w *waterConsumptionApp) RetrieveWaterConsumptions(deviceId string, from ti
 	return results, nil
 }
 
-func (w *waterConsumptionApp) UpdateWaterConsumption(device string, consumption float64, timestamp time.Time) error {
-	_, err := w.db.StoreWaterConsumption(device, consumption, timestamp)
+func (w *waterConsumptionApp) UpdateWaterConsumption(entityId, device string, consumption float64, timestamp time.Time) error {
+	_, err := w.db.StoreWaterConsumption(entityId, device, consumption, timestamp)
 	if err != nil {
 		return err
 	}

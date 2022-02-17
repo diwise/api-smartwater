@@ -44,7 +44,10 @@ func (cs contextSource) CreateEntity(typeName, entityID string, req ngsi.Request
 		return err
 	}
 
-	err = cs.app.UpdateWaterConsumption(entityID, wco.WaterConsumption.Value, observedAt)
+	device := strings.TrimPrefix(wco.WaterConsumption.ObservedBy.Object, fiware.DeviceIDPrefix)
+	entityID = strings.TrimPrefix(wco.ID, fiware.WaterConsumptionObservedIDPrefix)
+
+	err = cs.app.UpdateWaterConsumption(entityID, device, wco.WaterConsumption.Value, observedAt)
 
 	return err
 }
@@ -62,7 +65,7 @@ func (cs contextSource) GetEntities(query ngsi.Query, callback ngsi.QueryEntitie
 	}
 
 	for _, w := range waterconsumptions {
-		entity := fiware.NewWaterConsumptionObserved(w.Device).WithConsumption(w.Device, w.Consumption, w.Timestamp)
+		entity := fiware.NewWaterConsumptionObserved(w.WCOID).WithConsumption(w.Device, w.Consumption, w.Timestamp)
 
 		err = callback(entity)
 		if err != nil {
