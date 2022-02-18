@@ -65,7 +65,7 @@ func (cs contextSource) GetEntities(query ngsi.Query, callback ngsi.QueryEntitie
 	}
 
 	for _, w := range waterconsumptions {
-		entity := fiware.NewWaterConsumptionObserved(w.WCOID).WithConsumption(w.Device, w.Consumption, w.Timestamp)
+		entity := fiware.NewWaterConsumptionObserved(w.WCOID).WithConsumption(fiware.DeviceIDPrefix+w.Device, w.Consumption, w.Timestamp)
 
 		err = callback(entity)
 		if err != nil {

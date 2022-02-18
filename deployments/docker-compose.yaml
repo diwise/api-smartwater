@@ -8,8 +8,6 @@ services:
     restart: always
     depends_on:
       - postgresdb
-    links:
-      - postgresdb
     environment:
       DIWISE_SQLDB_HOST: 'postgresdb'
       DIWISE_SQLDB_USER: 'testuser'
@@ -19,7 +17,41 @@ services:
       SERVICE_PORT: '8090'
       
     ports:
-      - '8090:8090'
+      - '8090'
+
+  contextbroker:
+    image: 'ghcr.io/diwise/api-snowdepth:prod-d1d9b09c10baad2dbf0b15fd83a1562a6c74b89f'
+    restart: always
+    depends_on:
+      - postgresdb
+    environment:
+      SNOWDEPTH_DB_HOST: 'postgresdb'
+      SNOWDEPTH_DB_USER: 'testuser'
+      SNOWDEPTH_DB_NAME: 'smartwater'
+      SNOWDEPTH_DB_PASSWORD: 'testpass'
+      SNOWDEPTH_DB_SSLMODE: 'disable'
+      SNOWDEPTH_API_PORT: '8282'
+      NGSI_CTX_SRC_SMARTWATER: 'http://smartwater:8090'
+      RABBITMQ_DISABLED: 'true'
+      
+    ports:
+      - '8282:8282'
+
+  ingress:
+    image: 'ghcr.io/diwise/ingress-mqtt@sha256:c0cf0d25d25d1f9bcaf59f8f54f33ade23a9f01bdc3f0d1c7bea9fe94e7a2726'
+    restart: always
+    depends_on:
+      - contextbroker
+    environment:
+      MQTT_HOST: $MQTT_HOST
+      MQTT_PORT: $MQTT_PORT
+      MQTT_TOPIC: $MQTT_TOPIC
+      MQTT_TOPIC_0: 'application/2/device/#'
+      MQTT_TOPIC_1: 'application/21/device/#'
+      MQTT_TOPIC_2: 'application/22/device/#'
+      MQTT_USER: $MQTT_USER
+      MQTT_PASSWORD: $MQTT_PASSWORD
+      DIWISE_CONTEXT_BROKER_URL: 'http://contextbroker:8282'
 
   postgresdb:
     image: 'ghcr.io/diwise/test-db-postgresql:prod-824e7cffd65dd3766c88441a48cffd5b2acd55f2'
