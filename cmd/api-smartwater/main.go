@@ -41,7 +41,7 @@ func main() {
 
 	log.Info().Str("port", port).Msg("starting to listen for connections")
 
-	log.Log().Str("Starting api-opendata on port:%s", port)
+	log.Log().Str("Starting api-smartwater on port:%s", port)
 	err = http.ListenAndServe(":"+port, r)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to listen for connections")
